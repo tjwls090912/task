@@ -202,12 +202,20 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center; color: #0f172a; margin-bottom: 2rem; font-weight:800;'>무비레코드365</h2>", unsafe_allow_html=True)
     
     menu = st.radio(
-        "이동할 메뉴를 선택하세요",
+        "메뉴 선택",
         ["1년요약표", "영화아카이브", "새 영화 기록하기"],
-        index=0
+        label_visibility="collapsed"
     )
     
     st.markdown("---")
+    
+    # BGM 플레이어 추가
+    st.markdown("<div style='font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 5px;'>🎵 Background Music</div>", unsafe_allow_html=True)
+    bgm_url = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"
+    try:
+        st.audio(bgm_url, format="audio/mp3", loop=True)
+    except:
+        st.audio(bgm_url, format="audio/mp3")
     st.markdown(
         "<div style='text-align: center; color: #94a3b8; font-size: 0.85rem;'>"
         "나만의 영화 기록장<br>Powered by Streamlit"
