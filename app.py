@@ -490,16 +490,25 @@ elif menu == "영화아카이브":
                         else:
                             has_poster = False
                             if isinstance(row['poster_path'], str) and row['poster_path']:
-                                full_poster_path = os.path.join(POSTER_DIR, row['poster_path'])
-                                if os.path.exists(full_poster_path):
-                                    try:
-                                        from PIL import ImageOps
-                                        img = Image.open(full_poster_path)
-                                        img = ImageOps.fit(img, (600, 840), Image.Resampling.LANCZOS)
-                                        st.image(img, use_container_width=True)
-                                        has_poster = True
-                                    except Exception as e:
-                                        pass
+                                p_path = str(row['poster_path']).strip()
+                                if p_path.startswith("data:image"):
+                                    st.markdown(f"""
+                                    <div style="width: 100%; aspect-ratio: 1 / 1.4; overflow: hidden; border-radius: 12px; margin-bottom: 10px;">
+                                        <img src="{p_path}" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                                    has_poster = True
+                                else:
+                                    full_poster_path = os.path.join(POSTER_DIR, p_path)
+                                    if os.path.exists(full_poster_path):
+                                        try:
+                                            from PIL import ImageOps
+                                            img = Image.open(full_poster_path)
+                                            img = ImageOps.fit(img, (600, 840), Image.Resampling.LANCZOS)
+                                            st.image(img, use_container_width=True)
+                                            has_poster = True
+                                        except Exception as e:
+                                            pass
                             
                             if not has_poster:
                                 st.markdown(f"""
@@ -570,18 +579,26 @@ elif menu == "새 영화 기록하기":
                 if not title or not review:
                     st.error("영화 제목과 한줄평은 필수 입력 사항입니다.")
                 else:
-                    poster_filename = ""
+                    poster_val = ""
                     if uploaded_file is not None:
                         try:
-                            ext = os.path.splitext(uploaded_file.name)[1]
-                            poster_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{title.replace(' ', '_')}{ext}"
-                            poster_save_path = os.path.join(POSTER_DIR, poster_filename)
+                            import base64
+                            from io import BytesIO
+                            from PIL import ImageOps
                             
                             image = Image.open(uploaded_file)
-                            image.save(poster_save_path)
+                            if image.mode != 'RGB':
+                                image = image.convert('RGB')
+                            
+                            image = ImageOps.fit(image, (300, 420), Image.Resampling.LANCZOS)
+                            
+                            buffered = BytesIO()
+                            image.save(buffered, format="JPEG", quality=75)
+                            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                            poster_val = f"data:image/jpeg;base64,{img_str}"
                         except Exception as e:
-                            st.warning(f"이미지 저장 중 오류 발생: {e}. 포스터 없이 등록됩니다.")
-                            poster_filename = ""
+                            st.warning(f"이미지 변환 중 오류 발생: {e}. 포스터 없이 등록됩니다.")
+                            poster_val = ""
                     
                     new_row = {
                         'title': title,
@@ -589,7 +606,7 @@ elif menu == "새 영화 기록하기":
                         'rating': float(rating),
                         'genre': genre,
                         'review': review,
-                        'poster_path': poster_filename,
+                        'poster_path': poster_val,
                         'runtime': int(runtime),
                         'companion': companion,
                         'award_nominee': "None",
