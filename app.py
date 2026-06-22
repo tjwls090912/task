@@ -421,11 +421,12 @@ elif menu == "영화아카이브":
 
         
         if search_query:
-            filtered_df = filtered_df[
-                filtered_df['title'].str.contains(search_query, case=False, na=False) |
-                filtered_df['review'].str.contains(search_query, case=False, na=False) |
-                filtered_df['notes'].str.contains(search_query, case=False, na=False)
-            ]
+            mask = filtered_df['title'].astype(str).str.contains(search_query, case=False, na=False)
+            if 'review' in filtered_df.columns:
+                mask |= filtered_df['review'].astype(str).str.contains(search_query, case=False, na=False)
+            if 'notes' in filtered_df.columns:
+                mask |= filtered_df['notes'].astype(str).str.contains(search_query, case=False, na=False)
+            filtered_df = filtered_df[mask]
             
         if selected_genre != "전체":
             filtered_df = filtered_df[filtered_df['genre'] == selected_genre]
