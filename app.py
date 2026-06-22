@@ -549,7 +549,7 @@ elif menu == "영화아카이브":
 
 # ----------------- [메뉴 3: 새 영화 기록하기] -----------------
 elif menu == "새 영화 기록하기":
-    st.markdown('<h1 class="cinema-title">ADD RECORD</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="cinema-title" style="color: black;">새 영화 기록하기</h1>', unsafe_allow_html=True)
     st.markdown('<p class="cinema-subtitle">새로운 영화의 여정을 내 아카이브에 추가하세요</p>', unsafe_allow_html=True)
     
     with st.container():
